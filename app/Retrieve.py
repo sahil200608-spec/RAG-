@@ -11,21 +11,44 @@ collection = client.get_collection(
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-query = "What is deliberate practice?"
+def retrieve(query, k=5):
 
-query_embedding = model.encode(query).tolist()
+    query_embedding = model.encode(query).tolist()
 
-results = collection.query(
-    query_embeddings=[query_embedding],
-    n_results= 3
-)
+    results = collection.query(
 
-for i in range(len(results["documents"][0])):
+        query_embeddings=[query_embedding],
 
-    print("\n" + "-" * 80)
+        n_results=k
 
-    print("Pages:", results["metadatas"][0][i]["pages"])
+    )
 
-    print("Distance:", results["distances"][0][i])
+    retrieved_chunks = []
 
-    print("Content:", results["documents"][0][i])
+    for i in range(len(results["documents"][0])):
+
+        retrieved_chunks.append({
+
+            "content": results["documents"][0][i],
+
+            "pages": results["metadatas"][0][i]["pages"],
+
+            "distance": results["distances"][0][i]
+
+        })
+
+    return retrieved_chunks
+
+if __name__ == "__main__":
+
+    results = retrieve(
+        "What are the characteristics of deliberate practice?",
+        k=3
+    )
+
+    for result in results:
+
+        print("\n" + "-" * 80)
+        print("Pages:", result["pages"])
+        print("Distance:", result["distance"])
+        print("Content:", result["content"])
