@@ -1,8 +1,23 @@
+# Python
 venv/
 __pycache__/
 *.pyc
-.DS_Store
 
+# Environment variables
+.env
+
+# Local vector database
 data/chroma/
 
-.env
+# Uploaded documents
+data/document/
+
+# Processed/generated data
+data/processed/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store

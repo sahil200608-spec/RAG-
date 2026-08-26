@@ -3,8 +3,7 @@ import json
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-with open("data/processed/chunks.json", "r", encoding="utf-8") as f:
-    data = json.load(f)
+
 
 def embedder(chunks):
 
