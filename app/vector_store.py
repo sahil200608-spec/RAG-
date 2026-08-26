@@ -1,42 +1,48 @@
 import chromadb
 import json 
 
-client = chromadb.PersistentClient(
-    path = "data/chroma"
-)
+def save_To_db(chunks):
 
-collection = client.get_or_create_collection(
-    name = "documents"
-)
+    client = chromadb.PersistentClient(
+        path = "data/chroma"
+    )
 
-with open ("data/processed/embeddings.json"  , "r" , encoding= "utf-8") as f :
-    data = json.load(f)
+    collection = client.get_or_create_collection(
+        name = "documents"
+    )
 
-chunks = data['chunks']
 
-collection.add(
-    ids = [
-        str(chunk['chunk_id']) for chunk in chunks
-    ],
 
-    embeddings=[
-        chunk["embedding"]
-        for chunk in chunks
-    ],
+    collection.add(
+        ids = [
+            str(chunk['chunk_id']) for chunk in chunks
+        ],
 
-    documents=[
-        chunk['content'] 
-        for chunk in chunks
-    ],
+        embeddings=[
+            chunk["embedding"]
+            for chunk in chunks
+        ],
 
-     metadatas=[
-        {
-            "pages": ",".join(
-                map(str, chunk["pages"])
-            )
-        }
-        for chunk in chunks
-    ]
-)
+        documents=[
+            chunk['content'] 
+            for chunk in chunks
+        ],
 
-print("Chunks added:", len(chunks))
+        metadatas=[
+            {
+                "pages": ",".join(
+                    map(str, chunk["pages"])
+                )
+            }
+            for chunk in chunks
+        ]
+    )
+
+    return {
+
+        "chunks_added": len(chunks),
+
+        "collection": "documents"
+
+    }
+

@@ -1,40 +1,28 @@
-from Retrieve import retrieve
-from reranker import rerank
-from prompt import build_prompt
-from LLM import generate_answer
+from fastapi import FastAPI
 
+from app.api.routes import router 
+from fastapi.middleware.cors import CORSMiddleware
 
-def answer_question(query):
+app = FastAPI()
 
-    print("1. Query received:", query)
+app.add_middleware(
 
-    results = retrieve(query)
-    print("2. Retrieval complete")
+    CORSMiddleware,
 
-    reranked = rerank(query, results)
-    print("3. Reranking complete")
+    allow_origins=[
 
-    prompt = build_prompt(query, reranked)
-    print("4. Prompt built")
-    print(prompt)
+        "http://localhost:3000",
 
-    answer = generate_answer(prompt)
-    print("5. LLM response received")
+        "http://localhost:5173",
 
-    
+    ],
 
-    return answer, reranked
+    allow_credentials=True,
 
-if __name__ == "__main__":
+    allow_methods=["*"],
 
-    query = input("Enter the Query: ")
+    allow_headers=["*"],
 
-    answer, sources = answer_question(query)
+)
 
-    print("\nAnswer:")
-    print(answer)
-
-    print("\nSources:")
-
-    for chunk in sources:
-        print(f"Pages: {chunk['pages']}")
+app.include_router(router)

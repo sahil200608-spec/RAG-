@@ -21,28 +21,3 @@ def rerank(query, chunks , top_k=3):
 
     return chunks[:top_k]
 
-if __name__ == "__main__":
-
-    from Retrieve import retrieve
-
-    query = "What are the characteristics of deliberate practice?"
-
-    chunks = retrieve(query, k=10)
-
-    results = rerank(
-        query,
-        chunks,
-        top_k=3
-    )
-
-    for result in results:
-
-        print("\n" + "-" * 80)
-
-        print("Pages:", result["pages"])
-
-        print("Vector distance:", result["distance"])
-
-        print("Rerank score:", result["rerank_score"])
-
-        print("Content:", result["content"])
