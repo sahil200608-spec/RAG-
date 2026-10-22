@@ -44,7 +44,7 @@ def chunk_pages(pages, chunk_size=500, overlap=50):
     return chunks
 
 if __name__ == "__main__":
-    from parser import extract_text
+    from app.Ingestion.parser import extract_text
 
     pages = extract_text("data/document/DeliberatePractice(PsychologicalReview).pdf")
 

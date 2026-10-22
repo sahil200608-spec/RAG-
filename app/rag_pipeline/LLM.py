@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve().parents[2];
 
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(ROOT_DIR/ ".env")
 
 client = genai.Client()
 

@@ -22,7 +22,7 @@ Embedding
  ↓
 Vector Database
  ↓
-Retrieval
+Hybrid Search
  ↓
 Reranking
  ↓
@@ -38,39 +38,74 @@ The goal of the project is to build and understand a complete end-to-end RAG sys
 
 ## Architecture
 
-```text
-                         ┌──────────────────────┐
-                         │      React UI        │
-                         │                      │
-                         │  PDF Upload          │
-                         │  Question Input      │
-                         │  Answer + Sources    │
-                         └──────────┬───────────┘
-                                    │
-                              HTTP / REST
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │      FastAPI         │
-                         │       Backend        │
-                         └──────────┬───────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    │                               │
-                    ▼                               ▼
-             Document Upload                    Question
-                    │                               │
-                    ▼                               ▼
-              Ingestion Pipeline              RAG Pipeline
-                    │                               │
-          ┌─────────┼─────────┐          ┌────────┼────────┐
-          ▼         ▼         ▼          ▼        ▼        ▼
-       Parser    Chunker   Embedder   Retrieve  Rerank   Prompt
-          │         │         │          │        │        │
-          └─────────┴─────────┘          │        │        │
-                    │                    └────┬───┘        │
-                    ▼                         ▼            ▼
-              ChromaDB                 Relevant Context   LLM
-                                                         │
-                                                         ▼
-                                                   Answer + Sources
+`                             ┌──────────────────────────┐
+                              │        React UI          │
+                              │                          │
+                              │  PDF Upload              │
+                              │  Question Input          │
+                              │  Answer + Sources        │
+                              └────────────┬─────────────┘
+                                           │
+                                     HTTP / REST
+                                           │
+                                           ▼
+                              ┌──────────────────────────┐
+                              │       FastAPI Backend    │
+                              │                          │
+                              │  Upload & Ask Endpoints  │
+                              └────────────┬─────────────┘
+                                           │
+                      ┌────────────────────┴────────────────────┐
+                      │                                         │
+                      ▼                                         ▼
+             ┌─────────────────┐                      ┌─────────────────┐
+             │ Document Upload │                      │    Question     │
+             └────────┬────────┘                      └────────┬────────┘
+                      │                                         │
+                      ▼                                         ▼
+             ┌─────────────────┐                      ┌─────────────────┐
+             │    Ingestion    │                      │  RAG Pipeline   │
+             │    Pipeline     │                      └────────┬────────┘
+             └────────┬────────┘                               │
+                      │                                         ▼
+          ┌───────────┼───────────┐                   ┌─────────────────────┐
+          ▼           ▼           ▼                   │  Hybrid Retrieval   │
+      ┌────────┐ ┌─────────┐ ┌──────────┐             └──────────┬──────────┘
+      │ Parser │ │ Chunker │ │ Embedder │                        │
+      └────────┘ └─────────┘ └──────────┘                        │
+          │           │           │                    ┌─────────┴─────────┐
+          └───────────┴───────────┘                    │                   │
+                      │                                ▼                   ▼
+                      ▼                       ┌────────────────┐  ┌────────────────┐
+             ┌─────────────────┐               │  Vector Search │  │ Keyword Search │
+             │   Embedded      │               │                │  │                │
+             │     Chunks      │               │   ChromaDB     │  │   BM25 Index   │
+             └────────┬────────┘               └────────┬───────┘  └────────┬───────┘
+                      │                                 │                   │
+                      ▼                                 └─────────┬─────────┘
+             ┌─────────────────┐                                 │
+             │    ChromaDB     │                                 ▼
+             │ Vector Storage  │                       ┌─────────────────────┐
+             └─────────────────┘                       │ Reciprocal Rank     │
+                                                       │ Fusion (RRF)        │
+                                                       └──────────┬──────────┘
+                                                                  │
+                                                                  ▼
+                                                       ┌─────────────────────┐
+                                                       │      Reranker       │
+                                                       └──────────┬──────────┘
+                                                                  │
+                                                                  ▼
+                                                       ┌─────────────────────┐
+                                                       │  Prompt Construction│
+                                                       └──────────┬──────────┘
+                                                                  │
+                                                                  ▼
+                                                       ┌─────────────────────┐
+                                                       │         LLM         │
+                                                       └──────────┬──────────┘
+                                                                  │
+                                                                  ▼
+                                                       ┌─────────────────────┐
+                                                       │   Answer + Sources  │
+                                                       └─────────────────────┘

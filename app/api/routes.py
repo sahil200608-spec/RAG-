@@ -1,8 +1,8 @@
 from fastapi import APIRouter ,UploadFile, File, HTTPException
 from pathlib import Path
 from pydantic import BaseModel 
-from app.RAG import answer_question
-from app.ingestion import ingest
+from app.rag_pipeline.RAG import answer_question
+from app.Ingestion.ingestion import ingest
 
 router = APIRouter()
 

@@ -27,8 +27,3 @@ def extract_text(PDF_PATH):
     doc.close()
     return pages 
 
-
-if __name__ == "__main__":
-    pages = extract_text("data/document/DeliberatePractice(PsychologicalReview).pdf")
-
-    print(pages[0])
