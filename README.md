@@ -73,33 +73,5 @@ flowchart TD
 - Reranking for improved relevance
 - LLM-generated answers with source passages
 
-## Getting Started
-
-### Backend
-
-```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd RAG
-
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-python -m uvicorn app.main:app --reload
-```
-
-API documentation: `http://127.0.0.1:8000/docs`
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Configure the required API keys and environment variables before running the application.
-
----
 
 **Goal:** Build an end-to-end RAG system while understanding the retrieval, ranking, and generation components.
