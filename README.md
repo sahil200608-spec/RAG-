@@ -1,28 +1,27 @@
 # Reader — Document RAG System
 
-A document question-answering system built around a Retrieval-Augmented Generation (RAG) pipeline.
+A document question-answering system built using **Retrieval-Augmented Generation (RAG)**.
 
-Reader allows users to upload PDF documents and ask questions about their contents. The system retrieves relevant passages from the uploaded documents, reranks them, builds a grounded prompt, and generates an answer using an LLM.
+Reader allows users to upload PDFs and ask questions about their contents. It retrieves relevant passages using hybrid search, reranks them, and generates answers using an LLM.
 
-The project is built with a Python/FastAPI backend and a React frontend.
+**Tech Stack:** React · FastAPI · ChromaDB · BM25 · Gemini
 
 ---
 
 ## Overview
 
-Reader follows a complete RAG pipeline:
-
+```text
 PDF
  ↓
 Text Extraction
  ↓
-Chunking
+Chunking & Embedding
  ↓
-Embedding
+Vector Storage
  ↓
-Vector Database
+Hybrid Search (Vector + BM25)
  ↓
-Hybrid Search
+Reciprocal Rank Fusion (RRF)
  ↓
 Reranking
  ↓
@@ -31,81 +30,76 @@ Prompt Construction
 LLM
  ↓
 Answer + Sources
-
-The goal of the project is to build and understand a complete end-to-end RAG system rather than relying on a single framework to hide the underlying components.
-
----
+```
 
 ## Architecture
 
-`                             ┌──────────────────────────┐
-                              │        React UI          │
-                              │                          │
-                              │  PDF Upload              │
-                              │  Question Input          │
-                              │  Answer + Sources        │
-                              └────────────┬─────────────┘
-                                           │
-                                     HTTP / REST
-                                           │
-                                           ▼
-                              ┌──────────────────────────┐
-                              │       FastAPI Backend    │
-                              │                          │
-                              │  Upload & Ask Endpoints  │
-                              └────────────┬─────────────┘
-                                           │
-                      ┌────────────────────┴────────────────────┐
-                      │                                         │
-                      ▼                                         ▼
-             ┌─────────────────┐                      ┌─────────────────┐
-             │ Document Upload │                      │    Question     │
-             └────────┬────────┘                      └────────┬────────┘
-                      │                                         │
-                      ▼                                         ▼
-             ┌─────────────────┐                      ┌─────────────────┐
-             │    Ingestion    │                      │  RAG Pipeline   │
-             │    Pipeline     │                      └────────┬────────┘
-             └────────┬────────┘                               │
-                      │                                         ▼
-          ┌───────────┼───────────┐                   ┌─────────────────────┐
-          ▼           ▼           ▼                   │  Hybrid Retrieval   │
-      ┌────────┐ ┌─────────┐ ┌──────────┐             └──────────┬──────────┘
-      │ Parser │ │ Chunker │ │ Embedder │                        │
-      └────────┘ └─────────┘ └──────────┘                        │
-          │           │           │                    ┌─────────┴─────────┐
-          └───────────┴───────────┘                    │                   │
-                      │                                ▼                   ▼
-                      ▼                       ┌────────────────┐  ┌────────────────┐
-             ┌─────────────────┐               │  Vector Search │  │ Keyword Search │
-             │   Embedded      │               │                │  │                │
-             │     Chunks      │               │   ChromaDB     │  │   BM25 Index   │
-             └────────┬────────┘               └────────┬───────┘  └────────┬───────┘
-                      │                                 │                   │
-                      ▼                                 └─────────┬─────────┘
-             ┌─────────────────┐                                 │
-             │    ChromaDB     │                                 ▼
-             │ Vector Storage  │                       ┌─────────────────────┐
-             └─────────────────┘                       │ Reciprocal Rank     │
-                                                       │ Fusion (RRF)        │
-                                                       └──────────┬──────────┘
-                                                                  │
-                                                                  ▼
-                                                       ┌─────────────────────┐
-                                                       │      Reranker       │
-                                                       └──────────┬──────────┘
-                                                                  │
-                                                                  ▼
-                                                       ┌─────────────────────┐
-                                                       │  Prompt Construction│
-                                                       └──────────┬──────────┘
-                                                                  │
-                                                                  ▼
-                                                       ┌─────────────────────┐
-                                                       │         LLM         │
-                                                       └──────────┬──────────┘
-                                                                  │
-                                                                  ▼
-                                                       ┌─────────────────────┐
-                                                       │   Answer + Sources  │
-                                                       └─────────────────────┘
+```mermaid
+flowchart TD
+    A["React UI<br/>PDF Upload · Questions · Answers"]
+    B["FastAPI Backend"]
+    C["Document Ingestion"]
+    D["Parser → Chunker → Embedder"]
+    E[("ChromaDB")]
+    F["Hybrid Retrieval"]
+    G["Vector Search + BM25"]
+    H["Reciprocal Rank Fusion (RRF)"]
+    I["Reranker"]
+    J["Prompt Construction"]
+    K["LLM (Gemini)"]
+    L["Answer + Sources"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    B --> F
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> L
+    L --> A
+```
+
+## Key Features
+
+- PDF text extraction and chunking
+- Semantic vector search using ChromaDB
+- Keyword retrieval using BM25
+- Hybrid retrieval with Reciprocal Rank Fusion
+- Reranking for improved relevance
+- LLM-generated answers with source passages
+
+## Getting Started
+
+### Backend
+
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd RAG
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+python -m uvicorn app.main:app --reload
+```
+
+API documentation: `http://127.0.0.1:8000/docs`
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Configure the required API keys and environment variables before running the application.
+
+---
+
+**Goal:** Build an end-to-end RAG system while understanding the retrieval, ranking, and generation components.
